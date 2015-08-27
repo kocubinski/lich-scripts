@@ -1,37 +1,43 @@
 #Automated box picker
 #Cheers	
+@disarmTimes = 2
+@timesDisarmed = 0
 
-# Start:
-# 	respond "***WAITING FOR OFFER***"
-# 	waitfor(" offers you ")
-# 	respond "***After waitfor***"
+@selfMode = variable[1] == "--self" || variable[1] == "-s"
 
-# 	if checkright != nil
-# 		fput "stow right";
-# 	end
-	
-# 	if checkleft != nil
-# 		fput "stow left";
-# 	end
+Start:
+	@timesDisarmed = 0;
+	unless @selfMode
+		respond "***WAITING FOR OFFER***"
+		waitfor(" offers you ")
+		respond "***After waitfor***"
 
-# 	fput "accept";
-	
-# 	person='';
-	
-# 	person = matchfind "You accept ?'s offer"; 
-	
-# 	respond " #{person}";
-	
+		if checkright != nil
+			fput "stow right";
+		end
+		
+		if checkleft != nil
+			fput "stow left";
+		end
 
-# 	#respond " #{checkright}";
-# 	#respond " #{checkleft}";
+		fput "accept";
+		
+		person='';
+		
+		person = matchfind "You accept ?'s offer"; 
+		
+		respond " #{person}";
+		
 
-# 	if person != nil
-# 		boxname = checkright;
-# 		respond " #{boxname}";
-# 		goto "openBox";
-# 	end
+		#respond " #{checkright}";
+		#respond " #{checkleft}";
 
+		if person != nil
+			boxname = checkright;
+			respond " #{boxname}";
+			goto "openBox"; 
+		end
+	end
 
 
 openBox:
@@ -152,8 +158,12 @@ PLATE:
 	goto "Start"
 
 NONE:
+	@timesDisarmed += 1
+	if @timesDisarmed < @disarmTimes
+		goto "openBox"
+	end
 	waitrt?
-	multifput "get lockpick from my toolkit", "pick right"
+	multifput "get lockpick from my #{Lich.lockpicksack}", "pick right"
 	match "CLICK", "It opens"
 	match "CLICK", "gives off an audible click as the tumblers snap open"
 	match "CLICK", "It does not appear to be locked"
@@ -166,7 +176,9 @@ BROKE:
 	goto "NONE"
 
 CLICK:
-	fput "put lockpick in my toolkit"
+	fput "put lockpick in my #{Lich.lockpicksack}"
 	pause 0.5
-	# fput "give #{person}"
-	# goto "Start"
+	unless @selfMode 
+		fput "give #{person}"
+		goto "Start"
+	end
