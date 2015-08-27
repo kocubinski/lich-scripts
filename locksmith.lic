@@ -1,0 +1,85 @@
+# common
+def wait(fn)
+end
+
+def includes?(patterns, line)
+	patterns.each do |p|
+		return true if line.include? p
+	end
+	return false
+end
+
+def trapped?(line) 
+	traps = 
+		["Examining the lock closely, you notice a small bladder filled with a strange liquid wedged between the tumblers",
+		 "you can see that the lock would push the two rods together should the lock be tampered with.",
+		 "small tube towards the bottom of the tumbler mechanism",
+		 "notice some spiderweb-like scratches on the lock plate which seem,",
+		 "you spy a tiny vial placed just past the tumblers of the lock mechanism",
+		 "you spy a small vial of fire-red liquid and a tiny hammer device which seems poised to shatter it",
+	 	 "common magical/chemical detonation",
+		 "inside the keyhole and notice the spring-loaded jaws",
+		 "dark crystal which seems imbedded in the locking mechanism",
+		 "appears to be the ends of springs incorporated with the hinges",
+		 "doesn't seem to belong there. Looking closer you see a gleaming sliver",
+		 "a small vial of liquid and a tiny hammer device",
+		 "spring open",
+	 	 "tiny hammer device",
+	 	 "a tiny vial placed just past",
+	 	 "spring-loaded jaws",
+	 	 "too organized to be just wear and tear",
+	 	 "gleaming sliver",
+	 	 "you notice that the casing is coated with a rough",
+		 "you feel around the lock and notice the inside chamber",
+	  	 "dark crystal which seems"]
+	 return includes? traps, line
+end
+
+def disarmed?(line)
+	success = 
+		["manage to bend the weak metal of the hammer",
+		 "manage to block the tiny hole next",
+		 "little force applied to the springs,",
+		 "to grind down parts of the lock mechanism so",
+		 "twig you found lying around, you manage to pop out the two pins that hold the upper",
+		 "you dab a little bit of wet mud on the white substance where the",
+		 "bend the weak metal of the hammer out of striking range",
+		 "small ball of cotton into the lock mechanism, surrounding and protecting ",
+		 "magical glyphs can be, you scrape some extra lines into the markings hoping to ",
+		 "sensitive metal rods out of alignment. It looks as though they cannot",
+		 "grainy substance which lines the walls of the casing. After a few moments, you ",
+		 "carefully apply it to the end of the small tube",
+		 "extra lines into the markings hoping to alter their",
+		 "block the tiny hole",
+		 "warp under the tremendous strain",
+		 "bend the weak metal out of striking",
+		 "protecting the small vial",
+		 "strong acrid smell",
+		 "small metal file to scrape away the rough",
+		 "won't come in contact with the crystal",
+		 "prevent sparks when the metal arm strikes it"]
+	return includes? success, line
+end
+
+#def disarm
+#	disarm right
+#	waitrt?
+#	disarm right
+#	waitrt?
+
+def test(line)
+	return line.include? "whispers" #) || (line =~ /whispers, "Foo."/)
+end
+
+#while line = get
+#	if test line
+#		echo "OK!"
+#	end
+#end
+
+#if test 'Frostir whispers Foo'
+if trapped? "You notice inside the keyhole and notice the spring-loaded jaws"
+	echo "It works!"
+else
+	echo "Fail!"
+end

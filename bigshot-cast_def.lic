@@ -1,0 +1,19 @@
+loop {
+        waitfor '/^Cast Round Time in effect|^You are now in a guarded stance'
+
+        #wait_while { running? 'sloot' }
+
+        pause_script 'bigshot'
+        if not running? 'sloot'
+        	start_script 'sloot'
+        end
+
+        #waitrt?
+        waitcastrt?
+        fput 'stance defensive'
+
+        #dothistimeout 'get my small statue', 5, /You remove/
+		#dothistimeout 'rub my statue', 5, /You rub/
+		#dothistimeout 'put statue in my tote', 5, /You put/
+        unpause_script 'bigshot'
+}

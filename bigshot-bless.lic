@@ -1,0 +1,9 @@
+loop {
+        waitfor '/^Your twohanded sword returns to normal.'
+
+        waitrt?
+        waitcastrt?
+        fput 'inc 304'
+        waitcastrt?
+        unpause_script 'bigshot'
+}

@@ -1,0 +1,15 @@
+GameObj.inv.each {|i|
+	if i.noun == "quiver"
+		i.contents.each { |arrows| 
+			if arrows.noun =~ /arrows/i
+				fput "l at ##{arrows.id}"
+				line = get						
+				if line =~ /The arrows are surrounded by a scintillating/i
+				elsif line =~ /You carefully count the arrows and find/i
+					fput "get ##{arrows.id}"
+					fput "drop ##{arrows.id}"
+				end							
+			end				
+		}
+	end
+}

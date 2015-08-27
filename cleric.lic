@@ -1,0 +1,15 @@
+def take_action(target, action)
+	echo target
+	echo action
+	case action
+	when "Bless"
+		fput "prep 304"
+		fput "cast #{target}"
+	end
+end
+
+while line = get
+	if line =~ /^(\w+) whispers, "(\w+) please."/
+		take_action($1, $2)
+	end
+end

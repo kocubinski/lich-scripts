@@ -1,0 +1,156 @@
+load "scripts/innercircle.rb"
+innercircle = circle()
+
+echo "Loading cleric bot by Aethor Whiteaxe"
+############################################################################################################
+
+def wait_rt
+  target_line = matchtimeout 4, "Roundtime:",  "Cast Roundtime"
+    if (target_line =~ /Roundtime\: (\d+) sec/i)
+      sleep $1.to_f
+    elsif (target_line =~ /Cast Roundtime (\d+) seconds/i)
+      sleep $1.to_f
+    end
+end
+
+def rez(name)
+  echo target_line = matchtimeout(50, "The feeling of weakness leaves you.")
+    if (target_line =~ /weakness/)
+      fput "prep 308"
+      fput "cast #{name}"
+      wait_rt
+      fput "prep 318"
+      fput "cast #{name}"
+      wait_rt
+      sleep 3
+      stop_script("goto")
+      start_script("goto", "innercircle")
+      unpause_script("goto")
+	while running?("goto")
+	sleep 5
+	end
+    elsif (not target_line =~ /weakness/)
+      stop_script("goto")
+      start_script("goto", "innercircle")
+      unpause_script("goto")
+	while running?("goto")
+	sleep 5
+	end
+    end
+    
+    
+end
+
+def unwounded_dead(name)
+   		    fput "appraise #{name}"
+       		    echo target_line = matchtimeout(10, "also quite dead", "has no apparent injuries.", "has no apparent wounds.")
+                      if (not target_line =~ /dead/)
+                          echo "UNWOUNDED!"
+                        echo target_line = matchtimeout(10, "also quite dead")
+                          if (target_line =~ /dead/)
+                              echo "DEAD!"
+                              return true
+                          end
+                      end
+                      return false
+end
+
+def personroomdesc(person)
+    fput "psinet locate #{person}"
+    target_line = matchtimeout(6, "You feel the memory of")
+    target_line = get 
+    target_line = get
+    return target_line
+end
+
+
+
+def rezat(name,loc)
+              fput "look"
+                    sleep 5
+                    unless ((Room[loc].id > 4972) and (Room[loc].id < 5180))
+                        fput "disband"
+                        fput "group open"
+                        start_script("goto", loc)
+                        sleep 2
+                        unpause_script("goto")
+			  while running?("goto")
+                            sleep 0.5
+			    end
+                        fput "sanct"
+			fput "lk #{name}"
+                            if (unwounded_dead(name))
+			    rez(name)
+			      else
+				start_script("goto",  "innercircle")
+				unpause_script("goto")
+				  while running?("goto")
+				    sleep 0.5
+				  end  
+			      end
+			  end
+		    end
+
+
+while(true)
+
+target_line = waitfor("thumps you!", "just nudged you.", "pokes you in the ribs.","bursts into tears!", "points at", "just nudged you", /\[Private\]\-/ )
+		
+	innercircle.each do |person|
+                if(target_line =~ /#{person} pulls you closer./i)
+                        fput "leave" 
+			fput "group open"
+			fput "hold #{person}"
+			target_line = waitfor("already a member of", "hand away from you", "take hold of #{person}'s hand")
+                            if(target_line =~ /already a member of/i)
+                             fput "chat to #{person} You are already grouped."
+                              end 
+		
+		elsif(target_line =~ /#{person} thumps you!/i)
+			if (mana?(11))
+				fput "prep 202"
+				fput "cast #{person}"
+				sleep 3.5
+				wait_rt
+			        else
+			          fput "shake head"
+                                end
+		elsif(target_line =~/#{person} just nudged you./i)
+                      fput "prep 304"
+                      fput "cast #{person}"
+		elsif(target_line =~ /#{person} bursts into tears/i)
+          if mana?(14)
+            fput "prep 114"
+            fput "cast #{person}"
+          else
+            fput "wave #{person}"
+            fput "snicker #{person}"
+            end
+			
+
+          elsif(target_line =~ /#{person} pokes you in the ribs./i)
+                      fput "spellup auto #{person}"
+                      sleep 25
+                      matchtimeout(25,"Spellup auto complete")
+                      
+          elsif(target_line =~ /\[Private\]\-#{person}\:  \"Raise (.+) at (.+)\"/i)
+              if $2 == "me"
+                  loc = personroomdesc($1)
+                  rezat($1,loc)
+              else
+                  rezat($1,$2)
+              end
+                   
+	    elsif(target_line =~ /#{person} points at (.+)/i)
+             if ( unwounded_dead(name))
+                            rez(name)
+			  else
+			    start_script("goto",  "innercircle")
+			    unpause_script("goto")
+                            end
+			  end
+		      end
+		      
+		    end
+	
+
