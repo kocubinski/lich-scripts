@@ -109,27 +109,27 @@ TRAP1:
 	pause 1
 	waitrt?
 	match "TRAP1", "You are not able"
-	match "NONE", "manage to bend the weak metal of the hammer"
-	match "NONE", "manage to block the tiny hole next"
-	match "NONE", "little force applied to the springs,"
-	match "NONE", "to grind down parts of the lock mechanism so"
-	match "NONE", "twig you found lying around, you manage to pop out the two pins that hold the upper"
-	match "NONE", "you dab a little bit of wet mud on the white substance where the"
-	match "NONE", "bend the weak metal of the hammer out of striking range"
-	match "NONE", "small ball of cotton into the lock mechanism, surrounding and protecting "
-	match "NONE", "magical glyphs can be, you scrape some extra lines into the markings hoping to "
-	match "NONE", "sensitive metal rods out of alignment. It looks as though they cannot"
-	match "NONE", "grainy substance which lines the walls of the casing. After a few moments, you "
-	match "NONE", "carefully apply it to the end of the small tube"
-	match "NONE", "extra lines into the markings hoping to alter their"
-	match "NONE", "block the tiny hole"
-	match "NONE", "warp under the tremendous strain"
-	match "NONE", "bend the weak metal out of striking"
-	match "NONE", "protecting the small vial"
-	match "NONE", "strong acrid smell"
-	match "NONE", "small metal file to scrape away the rough"
-	match "NONE", "won't come in contact with the crystal" 
-	match "NONE", "prevent sparks when the metal arm strikes it"
+	match "DISARMED", "manage to bend the weak metal of the hammer"
+	match "DISARMED", "manage to block the tiny hole next"
+	match "DISARMED", "little force applied to the springs,"
+	match "DISARMED", "to grind down parts of the lock mechanism so"
+	match "DISARMED", "twig you found lying around, you manage to pop out the two pins that hold the upper"
+	match "DISARMED", "you dab a little bit of wet mud on the white substance where the"
+	match "DISARMED", "bend the weak metal of the hammer out of striking range"
+	match "DISARMED", "small ball of cotton into the lock mechanism, surrounding and protecting "
+	match "DISARMED", "magical glyphs can be, you scrape some extra lines into the markings hoping to "
+	match "DISARMED", "sensitive metal rods out of alignment. It looks as though they cannot"
+	match "DISARMED", "grainy substance which lines the walls of the casing. After a few moments, you "
+	match "DISARMED", "carefully apply it to the end of the small tube"
+	match "DISARMED", "extra lines into the markings hoping to alter their"
+	match "DISARMED", "block the tiny hole"
+	match "DISARMED", "warp under the tremendous strain"
+	match "DISARMED", "bend the weak metal out of striking"
+	match "DISARMED", "protecting the small vial"
+	match "DISARMED", "strong acrid smell"
+	match "DISARMED", "small metal file to scrape away the rough"
+	match "DISARMED", "won't come in contact with the crystal" 
+	match "DISARMED", "prevent sparks when the metal arm strikes it"
 	fput "disarm right"
 	matchwait
 
@@ -157,6 +157,9 @@ PLATE:
 	fput "give #{person}"
 	goto "Start"
 
+DISARMED:
+	@timesDisarmed = 99
+	
 NONE:
 	@timesDisarmed += 1
 	if @timesDisarmed < @disarmTimes
