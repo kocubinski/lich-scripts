@@ -144,9 +144,12 @@ SCARAB:
 
 SCARAB2:
 	waitrt?
-	fput "disarm scarab"
-	fput "tap scarab"
-	match "NONE", "You tap"
+	#fput "disarm scarab"
+	#fput "tap scarab"
+	#match "NONE", "You tap"
+	# Don't disarm scarabs....
+	fput "glance scarab"
+	goto "NONE"
 	matchwait
 
 

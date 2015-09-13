@@ -1,0 +1,7 @@
+#fput "open #{Vars.lootsack}"
+#fput "open #{Vars.lootsack2}"
+fput "l in my #{Vars.lootsack}"
+fput "l in my #{Vars.lootsack2}"
+#pause 2
+#fput "close #{Vars.lootsack}"
+#fput "close #{Vars.lootsack2}"

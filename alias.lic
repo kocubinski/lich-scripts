@@ -9,14 +9,20 @@
 	game: any
 	tags: core
 	required: Lich >= 4.6.0
-	version: 0.6
+	version: 0.7
 
 	changelog:
+		0.7 (2015-08-31):
+			make triggers case-insensitive
 		0.6 (2015-03-10):
 			don't allow the script to run as trusted
 			update trigger regex after deleting a trigger
 		0.5 (2015-02-01):
 			add gui
+
+=end
+=begin
+
 		0.4 (2014-11-13):
 			remove leading spaces before sending the alias target
 		0.3 (2014-11-07):
@@ -26,10 +32,7 @@
 
 =end
 
-if $SAFE == 0
-	echo 'error: cowardly refusing to run as a trusted script'
-	exit
-end
+$SAFE = 3 if $SAFE < 3
 
 if script.vars[1] =~ /^stop/i
 	if UpstreamHook.list.include('alias-service')
@@ -300,7 +303,7 @@ hook_proc = proc { |client_string|
 											if (a[1] != nil) and a[1].sensitive?
 												if a[0].text.empty?
 													respond "[alias: warning: ignoring new alias with no trigger]"
-												elsif db.get_first_value("SELECT target FROM #{character} WHERE trigger=?", a[0].text.encode('UTF-8'))
+												elsif db.get_first_value("SELECT target FROM #{character} WHERE trigger=? COLLATE NOCASE;", a[0].text.encode('UTF-8'))
 													respond "[alias: warning: new alias #{a[0].text} already exists; ignoring]"
 												else
 													db.execute("INSERT INTO #{character} (trigger,target) VALUES(?,?);", a[0].text.encode('UTF-8'), a[1].text.encode('UTF-8'))
@@ -318,7 +321,7 @@ hook_proc = proc { |client_string|
 											if (a[1] != nil) and a[1].sensitive?
 												if a[0].text.empty?
 													respond "[alias: warning: ignoring new alias with no trigger]"
-												elsif db.get_first_value("SELECT target FROM global WHERE trigger=?", a[0].text.encode('UTF-8'))
+												elsif db.get_first_value("SELECT target FROM global WHERE trigger=? COLLATE NOCASE;", a[0].text.encode('UTF-8'))
 													respond "[alias: warning: new alias #{a[0].text} already exists; ignoring]"
 												else
 													db.execute("INSERT INTO global (trigger,target) VALUES(?,?);", a[0].text.encode('UTF-8'), a[1].text.encode('UTF-8'))
@@ -350,7 +353,7 @@ hook_proc = proc { |client_string|
 			end
 			trigger = $3.strip
 			target = $4
-			if old_target = db.get_first_value("SELECT target FROM #{table} WHERE trigger=?", trigger.encode('UTF-8'))
+			if old_target = db.get_first_value("SELECT target FROM #{table} WHERE trigger=? COLLATE NOCASE;", trigger.encode('UTF-8'))
 				db.execute("UPDATE #{table} SET target=? WHERE trigger=?;", target.encode('UTF-8'), trigger.encode('UTF-8'))
 				respond "\n--- Alias updated.  (old alias was: #{old_target})\n\n"
 			else
@@ -365,7 +368,7 @@ hook_proc = proc { |client_string|
 				table = character
 			end
 			trigger = $3
-			if target = db.get_first_value("SELECT target FROM #{table} WHERE trigger=?", trigger.encode('UTF-8'))
+			if target = db.get_first_value("SELECT target FROM #{table} WHERE trigger=? COLLATE NOCASE;", trigger.encode('UTF-8'))
 				db.execute("DELETE FROM #{table} WHERE trigger=?", trigger.encode('UTF-8'))
 				update_regex.call
 				respond "\n--- Alias deleted (#{trigger} => #{target})\n\n"
@@ -435,7 +438,7 @@ hook_proc = proc { |client_string|
 	elsif caller.count { |x| x =~ /do_client/ } < 2
 		if character_regex and (client_string =~ character_regex)
 			trigger, extra = $1, $2
-			if target = db.get_first_value("SELECT target FROM #{character} WHERE trigger=?;", trigger.encode('UTF-8'))
+			if target = db.get_first_value("SELECT target FROM #{character} WHERE trigger=? COLLATE NOCASE;", trigger.encode('UTF-8'))
 				target = target.split('\\r')#.collect { |line| line.sub(/^\s+/, '') }
 				if extra.empty?
 					target.collect! { |line| line.gsub('\\?', '') }
@@ -459,7 +462,7 @@ hook_proc = proc { |client_string|
 			nil
 		elsif global_regex and (client_string =~ global_regex)
 			trigger, extra = $1, $2
-			if target = db.get_first_value("SELECT target FROM global WHERE trigger=?;", trigger.encode('UTF-8'))
+			if target = db.get_first_value("SELECT target FROM global WHERE trigger=? COLLATE NOCASE;", trigger.encode('UTF-8'))
 				target = target.split('\\r')#.collect { |line| line.sub(/^\s+/, '') }
 				if extra.empty?
 					target.collect! { |line| line.gsub('\\?', '') }
@@ -491,3 +494,5 @@ hook_proc = proc { |client_string|
 
 UpstreamHook.add('alias-service', hook_proc)
 respond "--- Lich: alias service started"
+
+# fixme: override voodoo

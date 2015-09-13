@@ -1,0 +1,6 @@
+for i in 0..10
+	fput "get 1 arrow"
+	fput "whisper tonraq bless please"
+	pause 3
+	fput "put arrow in arrow in my quiver"
+end

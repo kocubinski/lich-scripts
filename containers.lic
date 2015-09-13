@@ -1,0 +1,25 @@
+#fput "open #{Vars.lootsack}"
+#fput "open #{Vars.lootsack2}"
+#pause 2
+#fput "close #{Vars.lootsack}"
+#fput "close #{Vars.lootsack2}"
+
+if variable[1].nil? 
+	exit
+end
+
+action = variable[1]
+
+case action
+	when "look"
+		fput "l in my #{Vars.lootsack}"
+		fput "l in my #{Vars.lootsack2}"
+	when "open"
+		fput "open #{Vars.lootsack}"
+		fput "open #{Vars.lootsack2}"
+	when "close"
+		fput "close #{Vars.lootsack}"
+		fput "close #{Vars.lootsack2}"
+end
+
+

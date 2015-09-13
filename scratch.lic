@@ -1,0 +1,4 @@
+while true
+	sleep 5
+	fput "get acorn"
+end

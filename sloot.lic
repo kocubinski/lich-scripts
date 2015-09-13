@@ -851,7 +851,7 @@ get_item = proc { |item,sack|
         line = "get #{id} from my #{sack}"
     end
     
-    res = dothistimeout line, 3, /is out of your reach|^You can't pick that up\.$|^You already have that\.$|^You pick up|You remove|crumbles and decays away.$|crumbles into a pile of dust!$|^You (?:shield the opening of .*? from view as you |discreetly |carefully )?(?:remove|draw|grab|reach|slip|tuck|retrieve|already have|unsheathe)|^Get what\?$|^Why don't you leave some for others\?$|^You need a free hand/
+    res = dothistimeout line, 3, /^You (?:shield the opening of .*? from view as you |discreetly |carefully )?(?:remove|draw|grab|reach|slip|tuck|retrieve|already have|unsheathe|pick up)|^Get what\?$|^Why don't you leave some for others\?$|^You need a free hand|is out of your reach|^You can't pick that up\.$|^You already have that\.$|crumbles and decays away.$|crumbles into a pile of dust!$/i
     if res =~ /is out of your reach/
         sleep 4
         redo
@@ -985,6 +985,7 @@ grab_loot = proc { |loot,from|
             result = false
             settings['overflowsack'].split(',').each { |overflow|
                 if put_item.call(loot,overflow)
+                	sacks[type] = GameObj.inv.find { |obj| obj.name =~ /\b#{Regexp.escape(overflow.strip)}/i }
                     result = true
                     break
                 end

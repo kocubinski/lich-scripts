@@ -53,15 +53,39 @@
 		
 	-Drafix
 =end
+def finish
+	waitrt?
+	put 'stance defensive'
+	exit
+end
+
+def swap_gear
+	item = ('boots' if @action == 'kick') || 'gaunt'
+	waitrt?
+	put "stance defensive"
+	put "remove #{item}"
+	put "put #{item} in pack"
+	put "get #{item} from cloak"
+	put "wear #{item}"
+end
+
 attack = proc {|target|
-	exit if target.status =~ /dead/
+
+	finish if target.status =~ /dead/
 	fput "stand" unless standing?
-	put 'stance offensive' unless percentstance(0)
-	if CharSettings['aim'] && @action !~ /jab/
-		put "#{@action} ##{target.id} #{@location}"
-	else
-		put "#{@action} ##{target.id}"
+
+	if (@ensure_hidden and not checkhidden)
+		waitrt?
+		put 'stance defensive' unless percentstance == 100
+		while true
+			fput "hide" unless checkhidden
+			waitrt?
+			break if checkhidden
+		end
 	end
+
+	fput 'stance offensive' unless percentstance == 0
+	put "#{@action} ##{target.id}"
 }
 
 changeAction = proc {|action|
@@ -86,110 +110,36 @@ findTarget = proc{
 	GameObj[$1]
 }
 
-def swap_gear
-	item = ('boots' if @action == 'kick') || 'gaunt'
-	waitrt?
-	put "stance defensive"
-	put "remove #{item}"
-	put "put #{item} in pack"
-	put "get #{item} from cloak"
-	put "wear #{item}"
-end
-
-CharSettings['aim'] ||= false 
-CharSettings['aim_location'] ||= Array.new
-
-if script.vars[1] =~ /^tier(up|3)$/
-	CharSettings["tier#{$1}"] = script.vars[2]
-	respond "You have specified #{CharSettings["tier#{$1}"]} as your Tier#{$1} attack"
-	respond "You can change this setting by typing ;#{script.name} tier#{$1} <jab/punch/grapple/kick>"
-	exit
-elsif script.vars[1] =~ /^aim=(on|off)$/
-	option = $1
-	if option == 'on'
-		CharSettings['aim']=true
-	elsif option == 'off'
-		CharSettings['aim']=false
-	else
-		respond "Bad option: #{option}"
-		exit
-	end
-	respond "Turning aiming #{option}"
-	exit
-elsif script.vars[1] =~ /^aim$/
-	unless CharSettings['aim']
-		respond "Aiming is turned off."
-		respond "Please enable aiming before using this option"
-		respond ";#{script.name} aim=<on/off>"
-		respond
-		exit
-	end
-	if script.vars[2..-1].length == 0
-		respond "No body parts specified"
-		respond "Try ;#{script.name} help"
-		respond
-		exit
-	end
-	CharSettings['aim_location'].clear
-	script.vars[2..-1].join(' ').gsub(', ', ',').split(',').reverse.each{|location|
-		CharSettings['aim_location'].push(location)
-	}
-	respond "Now aiming in this order (one body part per line):"
-	respond CharSettings['aim_location'].reverse
-	respond
-	respond "Note: Remember to use a comma to seperate the body parts"
-	respond
-	exit
-elsif script.vars[1] =~ /^help$/
-	respond "Setup your tierup and tier3 attacks by typing:  "
-	respond
-	respond ";#{script.name} tierup <jab/punch/grapple/kick>"
-	respond ";#{script.name} tier3 <jab/punch/grapple/kick>"
-	respond
-	respond ";#{script.name} aim=<on/off>"
-	respond ";#{script.name} aim <body parts>"
-	respond " ex: ;#{script.name} aim head, neck, right arm, chest" 
-	respond
-	exit
-end
-unless CharSettings['tierup']
-	respond
-	respond "Please specify what attack you want to use trying to tier-up"
-	respond "By typing ;#{script.name} tierup <jab/punch/grapple/kick> [Recommended that you use jab for easy tier-up]"
-	respond 
-	respond "The script will now exit."
-	exit
-end
-unless CharSettings['tier3']
-	respond
-	respond "Please specify what attack you want to use when you reach Tier 3"
-	respond "By typing ;#{script.name} tier3 <punch/grapple/kick>"
-	respond 
-	respond "The script will now exit."
-	exit
-end
-
 put 'aim clear'
 put 'stance off'
-@action =  CharSettings['tierup']
+@action='punch'
 @position='decent'
 @hit=true
 @debug=false
+@target_down=false
+@ensure_hidden=true
 status_tags
 
 @target = findTarget.call
 if @target.nil?
 	echo "No target found.  Exiting."
-	exit
+	finish
 end
-locations = CharSettings['aim_location'].dup
-@location = locations.pop
-attack.call(@target)
+
+@location = 'left leg'
+put 'aim left leg'
+attack.call(@target, true)
 while line = get
 	if line =~ /You have (decent|good|excellent) positioning/
 		changePosition.call($1)
 	elsif line =~ /but your attack has no effect!/
 		swap_gear
+	elsif line =~ /knocked to the ground|slumps to the ground/
+		echo "target down!"
+		@target_down=true
+		put 'aim clear'
+		@ensure_hidden=false
+		changeAction.call('kick')
 	elsif line =~ /.* = .* d100: .* = \-?(\d+)$/
 		endroll = $1
 		if endroll.to_i > 100
@@ -198,19 +148,18 @@ while line = get
 			@hit = false
 		end
 		echo @hit, endroll.to_i if @debug
-		changeAction.call('jab') if @position != 'excellent' && @hit
-		changeAction.call(CharSettings['tier3']) if @position == 'excellent' && @action != CharSettings['tier3']
+		#changeAction.call('jab') if @position != 'excellent' && @hit
+		#changeAction.call(CharSettings['tier3']) if @position == 'excellent' && @action != CharSettings['tier3']
 	elsif line =~ /Strike leaves foe vulnerable to a followup (.*) attack!/
-		#a = ('jab' if $1 == 'kick') || $1
 		a = $1
 		changeAction.call(a)
 		script.clear
+		#@ensure_hidden = false
 		attack.call(@target)
 	elsif line =~ /You fail to find an opening for your strike\./
-		attack.call(@target)
+		attack.call(@target, true)
 	elsif line =~ /is already missing that!/
-		@location = locations.pop
-		put 'aim clear' unless @location
+		put 'aim clear'
 		attack.call(@target)
 	elsif line =~ /Roundtime:/
 		echo "RT msg" if @debug
@@ -227,3 +176,5 @@ while line = get
 		break
 	end
 end
+
+put "stance defensive"
