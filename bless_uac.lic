@@ -1,10 +1,9 @@
-for i in 1..7
-	fput "get leather gaunt from pack"
-	fput "whisper tonr bless please"
-	pause 3
-	fput "put gaunt in cloak"
-	fput "get leather boots from pack"
-	fput "whisper tonr bless please"
-	pause 3
-	fput "put boots in cloak"
-end
+sack = GameObj.inv.find { |item| item.noun.include? Vars.lootsack }
+sack.contents.each { |item|
+	if item.noun =~ /gauntlets|boots/
+		put  "get ##{item.id}"
+		fput "whisper tonr bless please"
+		sleep 3
+		put "put ##{item.id} in #{Vars.lootsack2}"
+	end
+}
