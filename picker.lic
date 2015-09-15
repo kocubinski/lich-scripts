@@ -184,7 +184,14 @@ BROKE:
 CLICK:
 	fput "put lockpick in my #{Lich.lockpicksack}"
 	pause 0.5
-	unless @selfMode 
+	if @selfMode
+		box = GameObj.right_hand
+		trash = GameObj.loot.find{ |i| i.name =~ /barrel/ }
+		put "open ##{box.id}"
+		Script.run('sloot', 'right')
+		waitrt?
+		put "put ##{box.id} in ##{trash.id}"
+	else 
 		fput "give #{person}"
 		goto "Start"
 	end
